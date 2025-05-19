@@ -112,7 +112,18 @@ blogRouter.use('/*',async (c,next) => {
   const prisma = new PrismaClient({
     datasourceUrl:c.env.DATABASE_URL
   }).$extends(withAccelerate())
-    const blogs = await prisma.blog.findMany()
+    const blogs = await prisma.blog.findMany({
+      select:{
+        title:true,
+        content:true,
+        id:true,
+        author:{
+          select:{
+            name:true
+          }
+        }
+      }
+    })
     return c.json(blogs)
  })
 // to delete an blog
