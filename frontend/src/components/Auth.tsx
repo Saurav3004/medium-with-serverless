@@ -5,37 +5,52 @@ import { Link, useNavigate } from "react-router-dom";
 import { BACKEND_URL } from "../config";
 
 export const Auth = ({ type }: { type: "signup" | "signin" }) => {
-    const navigate = useNavigate()
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(false);
   const [postInputs, setPostInputs] = useState<SignupInput>({
     name: "",
     email: "",
     password: "",
   });
 
-  async function sendRequest(){
-    
-       try {
-         const response = await axios.post(`${BACKEND_URL}/api/v1/user/${type == "signup" ? "signup" : "signin"}`,postInputs);
-         const data = response.data
-         console.log(data.token)
-         localStorage.setItem("token",data.token)
-         navigate("/blog")
-       } catch (error) {
-        alert("Error while signing up")
-        console.log(error)
-       }
-        
-    
+  async function sendRequest() {
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        `${BACKEND_URL}/api/v1/user/${type == "signup" ? "signup" : "signin"}`,
+        postInputs
+      );
+      const data = response.data;
+      console.log(data.token);
+      localStorage.setItem("token", data.token);
+      setLoading(false);
+      navigate("/blogs");
+    } catch (error) {
+      setLoading(false);
+      if (axios.isAxiosError(error)) {
+        console.log(error.response?.data?.msg);
+      } else {
+        console.log(error);
+      }
+    }
   }
   return (
     <div className="h-screen flex flex-col justify-center w-full ">
       <div className="flex flex-col  justify-center items-center ">
         <div>
           <div>
-            <div className="text-3xl mr-3 font-extrabold">{type == "signup" ? "Create an account" : "Welcome back!!"}</div>
+            <div className="text-3xl mr-3 font-extrabold">
+              {type == "signup" ? "Create an account" : "Welcome back!!"}
+            </div>
             <div className="text-slate-500">
-              {type == "signup" ? ("Already have an account?") : ("Don't have an account?")}{" "}
-              <Link to={type == "signup" ? "/signin" : "/signup"} className="underline pl-1">
+              {type == "signup"
+                ? "Already have an account?"
+                : "Don't have an account?"}{" "}
+              <Link
+                to={type == "signup" ? "/signin" : "/signup"}
+                className="underline pl-1"
+              >
                 {type == "signup" ? "Sign in" : "Sign up"}
               </Link>
             </div>
@@ -55,16 +70,18 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
               }}
             />
 
-            {type == "signup" ? (<LabelledInput
-              label="Username"
-              placeholder="Enter your username"
-              onChange={(e) => {
-                setPostInputs({
-                  ...postInputs,
-                  name: e.target.value,
-                });
-              }}
-            />) : null}
+            {type == "signup" ? (
+              <LabelledInput
+                label="Username"
+                placeholder="Enter your username"
+                onChange={(e) => {
+                  setPostInputs({
+                    ...postInputs,
+                    name: e.target.value,
+                  });
+                }}
+              />
+            ) : null}
 
             <LabelledInput
               label="Password"
@@ -77,9 +94,23 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
                 });
               }}
             />
-            <button onClick={sendRequest}  type="button" className="text-white w-full mt-2 bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">{type == "signup" ? "Sign up" : "Sign in"}</button>
+            <button
+              onClick={sendRequest}
+              type="button"
+              disabled={loading}
+              className="text-white w-full mt-2 bg-gray-800  focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 flex justify-center items-center cursor-pointer"
+            >
+              {loading ? (
+                <>
+                 <span className="ml-2">Loading...</span>
+                </>
+              ) : type === "signup" ? (
+                "Sign up"
+              ) : (
+                "Sign in"
+              )}
+            </button>
           </div>
-          
         </div>
       </div>
     </div>

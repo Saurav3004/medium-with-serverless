@@ -1,4 +1,4 @@
-export default function Blog(){
+export const  Blog = () =>{
     return (
         <div>
             Blog page
